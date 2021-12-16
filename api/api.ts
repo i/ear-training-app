@@ -10,8 +10,7 @@ export class Api {
     try {
       const response = await fetch(this.baseUri + '/test');
       return await response.json();
-    }
-    catch (error) {
+    } catch (error) {
       // Handle the error.
       console.log(error);
     }
@@ -22,8 +21,7 @@ export class Api {
     try {
       const response = await fetch(this.baseUri + '/audio');
       return await response.json();
-    }
-    catch (error) {
+    } catch (error) {
       // Handle the error.
       console.log(error);
     }

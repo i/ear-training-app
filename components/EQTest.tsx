@@ -35,7 +35,7 @@ export function EQTest() {
 
   const [freq, setFreq] = React.useState(500);
   const onTouchMove = function(val) {
-    setFreq(val);
+    setFreq(logslider(val));
   }
 
   function logslider(position: number) {
@@ -68,6 +68,7 @@ export function EQTest() {
       />
 
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
+      <TextInput value={text}  onChangeText={onChangeText} />
     </View>
   )
 }
