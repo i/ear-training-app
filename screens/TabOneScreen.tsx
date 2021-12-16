@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Button } from 'react-native';
 import { Audio } from 'expo-av';
 
@@ -7,12 +8,12 @@ import { Text, View } from '../components/Themed';
 import { RootTabScreenProps } from '../types';
 
 
-function AudioPlayer(ctx) {
+function AudioPlayer(props) {
   var playingIndex = 0;
   const playing = false;
   const sounds: Audio.Sound[] = [];
 
-  const uris = ctx.uris;
+  const uris = props.uris;
 
 
   console.log(uris);
@@ -61,12 +62,18 @@ function AudioPlayer(ctx) {
 }
 
 export default function TabOneScreen({ navigation }: RootTabScreenProps<'TabOne'>) {
-  const uris = [
-    'https://2d2b-98-174-90-59.ngrok.io/audio/9a424deb-c063-41a4-8277-bfe64c97fc0f-eq-200.mp3',
-    'https://2d2b-98-174-90-59.ngrok.io/audio/9a424deb-c063-41a4-8277-bfe64c97fc0f-eq-350.mp3',
-    'https://2d2b-98-174-90-59.ngrok.io/audio/9a424deb-c063-41a4-8277-bfe64c97fc0f-eq-500.mp3',
-    'https://2d2b-98-174-90-59.ngrok.io/audio/9a424deb-c063-41a4-8277-bfe64c97fc0f-eq-8000.mp3'
-  ];
+  const [uris, setUris] = useState([]);
+
+  const getUris = async() => {
+    const api = new Api('http://localhost:8080');
+    const json = await api.getAudios();
+    setUris(json.audios.map((a) => { return "http://localhost:8080/audio/" + a.ID }));
+  };
+
+
+  useEffect(() => {
+    getUris();
+  }, []);
 
   return (
     <View style={styles.container}>
