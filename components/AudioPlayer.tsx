@@ -4,10 +4,26 @@ import { StyleSheet, Button, Text, TextInput } from 'react-native';
 import { View } from '../components/Themed';
 
 export function MultiAudioPlayer({ uris }) {
-  console.log('rerendering');
-
-
   const [loading, setLoading] = React.useState(false);
+
+  const initialState = {
+    uris: [],
+    buttons: [],
+    sounds: [],
+    activeIndex: 0,
+  };
+
+  function reset(state) {
+    console.log('resetting state...');
+    return state;
+  }
+
+  const [state, dispatch] =  React.useReducer(reducer, initialState, reset);
+
+  console.log('rerendering');
+  console.log(state);
+
+
 
   function reducer(state, action) {
     switch (action.type) {
@@ -20,19 +36,24 @@ export function MultiAudioPlayer({ uris }) {
           return state;
         }
 
+        console.log(state);
         setLoading(true);
         unloadAll(state.sounds);
         playAllSounds(action.uris);
-        return { uris: action.uris };
+        return { ...state, uris: action.uris, activeIndex: 0 };
 
       case 'play':
         startAllSounds(state.sounds)
         toggleMutes(state.sounds, action.index);
-        return state;
+        //toggleButtons(state.buttons, action.index);
+        return { ...state, activeIndex: action.index };
 
-      case 'setButtonsAndSounds':
+      case 'setSounds':
         setLoading(false);
-        return { ...state, buttons: action.buttons, sounds: action.sounds };
+        return { ...state,  uris: action.uris, sounds: action.sounds };
+
+      default:
+        throw(`invalid action type: ${action.type}`);
     }
   }
 
@@ -42,11 +63,6 @@ export function MultiAudioPlayer({ uris }) {
     }
   }
 
-  const [state, dispatch] =  React.useReducer(reducer, {
-    uris: [],
-    buttons: [],
-    sounds: [],
-  });
 
   React.useEffect(() => {
     dispatch({type: 'replaceUris', uris: uris});
@@ -85,40 +101,66 @@ export function MultiAudioPlayer({ uris }) {
     isLooping: true,
   };
 
+  function makeButtons() {
+    const buttons = [];
+    for (var i = 0; i < state.uris.length; i++) {
+      const idx = i;
+      const title = i == 0 ? "PRE-EQ" : "POST-EQ";
+      const color = i == state.activeIndex ? colors.activeButtonColor : colors.inactiveButtonColor;
+      buttons.push(<Button
+        key={i}
+        color={color}
+        onPress={() => dispatch({type: 'play', index: idx})}
+        title={title}
+      />);
+    }
+    return buttons;
+  }
+
   async function playAllSounds(uris: Array<string>) {
     console.log('playing sounds: ', uris);
     const sounds: Array<Audio.Sound> = [];
-    const buttons = [];
 
     for (var i = 0; i < uris.length; i++) {
       const source = { uri: uris[i] };
       const sound = new Audio.Sound();
-      //await sound.loadAsync(source, { ...initialStatus, volume: 1 }, false);
       await sound.loadAsync(source, { ...initialStatus, volume: i == 0 ? 1 : 0 }, false);
       sounds.push(sound);
 
-      const title = "PLAY " + i;
       const key = `audio_${i}`;
       const idx = i;
-
-      buttons.push(<Button key={key} onPress={() => dispatch({type: 'play', index: idx})} title={title}/>);
     }
-
-    dispatch({type: 'setButtonsAndSounds', buttons, sounds});
+    dispatch({type: 'setSounds', uris, sounds});
   }
 
   if (loading) {
-    return (<Text>Loading...</Text>);
+    return (<><Text>Loading...</Text></>);
   }
 
+  const buttons = makeButtons();
+  console.log(buttons);
 
   return (
     <View>
-      <Button onPress={() => dispatch({type: 'play', index: 0})} title="Play" />
-      <Text>This is a crock of crap {state.buttons.length}</Text>
-      {state.buttons}
+      <View style={styles.buttons}>
+        {makeButtons()}
+      </View>
     </View>
   );
+}
+
+const styles = StyleSheet.create({
+  buttons: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    flex: 1,
+    margin: 5,
+  },
+});
+
+const colors = {
+  activeButtonColor: 'green',
+  inactiveButtonColor: 'red'
 }
 
 

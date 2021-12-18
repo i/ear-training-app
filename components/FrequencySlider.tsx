@@ -15,7 +15,7 @@ export function FrequencySlider(props) {
 
   const done = function(val: number) {
     const guess = logslider(val);
-    onSlidingComplete(guess);
+    onSlidingComplete(freq);
   }
 
   return (
@@ -29,7 +29,7 @@ export function FrequencySlider(props) {
         minimumTrackTintColor="#FFF000"
         maximumTrackTintColor="#000000"
         onValueChange={onTouchMove}
-        onSlidingComplete={onSlidingComplete}
+        onSlidingComplete={done}
       />
     </View>
   );
@@ -50,6 +50,9 @@ function logslider(position: number) {
 }
 
 const styles = StyleSheet.create({
+  freqSlider: {
+    flex: 1,
+  },
   slider: {
     width: 200,
     height: 40,

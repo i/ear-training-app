@@ -19,6 +19,9 @@ export function EQTest() {
     const test = api.getTest().then((test) => { setTestItems(test.items); });
   };
 
+  const [score, setScore] = React.useState(0);
+  const [lives, setLives] = React.useState(3);
+
   const showTestItem = function() {
     if (testItems.length === 0) { return; }
     setTestItem(testItems[testItemIdx]);
@@ -30,6 +33,7 @@ export function EQTest() {
 
 
   const makeGuess = function(guessedFrequency: number) {
+    console.log('you guessed', guessedFrequency);
     const perfectTolerance = testItem.perfect_tolerance * testItem.boosted_frequency;
     const perfectMin = testItem.boosted_frequency - perfectTolerance;
     const perfectMax = testItem.boosted_frequency + perfectTolerance;
@@ -40,9 +44,12 @@ export function EQTest() {
 
     if (guessedFrequency > perfectMin && guessedFrequency < perfectMax) {
       alert('perfect');
+      setScore(score+5);
     } else if (guessedFrequency > okMin && guessedFrequency < okMax) {
+      setScore(score+1);
       alert('good');
     } else {
+      setLives(lives-1);
       alert('no good');
     }
 
@@ -51,10 +58,20 @@ export function EQTest() {
 
   //const player = // React.useMemo(() =>
     //React.createElement(MultiAudioPlayer, {uris: getUris(testItem)}) // , [testItem]);
+  //
+
+  if (lives < 1) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>YOU DEAD</Text>
+      </View>
+    )
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Test item index: {testItemIdx}</Text>
+      <Text style={styles.title}>Score: {score}</Text>
+      <Text style={styles.title}>Lives: {lives}</Text>
       <Text style={styles.title}>Enter the boosted frequency!</Text>
       <MultiAudioPlayer uris={getUris(testItem)} />
 
@@ -86,15 +103,10 @@ const styles = StyleSheet.create({
   },
 });
 
-function getUris(testItem) {
+function getUris(testItem: any) {
   if (!testItem) {
     return [];
   }
-
-  //return [
-    //'http://localhost:8080/audio/544713f2-57a0-4a48-bd19-b74ff8ba477f/download.mp3',
-    //'http://localhost:8080/audio/32c9ccef-f24a-4878-b06d-d6511b5ca78d/download.mp3',
-  //];
 
   return [
     testItem['original_audio_url'],
