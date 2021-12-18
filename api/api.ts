@@ -9,7 +9,12 @@ export class Api {
   public async getTest() {
     try {
       const response = await fetch(this.baseUri + '/test');
-      return await response.json();
+      const json =  await response.json();
+      json.items.forEach((item) => {
+        item.original_audio_url = item.original_audio_url.replace('localhost', '10.21.21.8') + '/download.mp3';
+        item.processed_audio_url = item.processed_audio_url.replace('localhost', '10.21.21.8') + '/download.mp3';
+      })
+      return json;
     } catch (error) {
       // Handle the error.
       console.log(error);
